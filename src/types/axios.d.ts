@@ -57,3 +57,12 @@ export interface CodeMsgResult {
   code: number
   msg: string
 }
+
+export interface BaseRecordResult<T = any> {
+  code: number // 状态码
+  msg: string // 消息
+  data: {
+    records: T[]
+    count: number
+  }
+}
