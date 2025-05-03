@@ -41,11 +41,11 @@
                   :on-error="onError"
                   :before-upload="beforeUpload"
                 >
-                  <div v-if="!cover" class="upload-placeholder">
+                  <div v-if="!form.articleCover" class="upload-placeholder">
                     <el-icon class="upload-icon"><Plus /></el-icon>
                     <div class="upload-text">点击上传封面</div>
                   </div>
-                  <img v-else :src="cover" class="cover-image" />
+                  <img v-else :src="form.articleCover" class="cover-image" />
                 </el-upload>
                 <div class="el-upload__tip">建议尺寸 16:9，jpg/png 格式</div>
               </div>
@@ -164,8 +164,8 @@
             </el-form-item>
             <el-form-item label="发布形式">
               <el-radio-group v-model="form.status">
-                <el-radio :label="1">公开</el-radio>
-                <el-radio :label="2">密码</el-radio>
+                <el-radio :value="1">公开</el-radio>
+                <el-radio :value="2">密码</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="访问密码" v-if="form.status == 2">
@@ -180,13 +180,12 @@
               />
             </el-form-item>
           </el-form>
-          <!-- 
           <div style="display: flex; justify-content: flex-end">
             <el-button @click="saveArticleDraft" v-if="form.id == null || form.status == 3">
               保存
             </el-button>
             <el-button type="primary" @click="submit" style="width: 100px"> 发布 </el-button>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
@@ -198,11 +197,12 @@
   import { ElMessage } from 'element-plus'
   import { useUserStore } from '@/store/modules/user'
   import EmojiText from '@/utils/emojo'
+  import { ArticleService } from '@/api/blog/articleApi'
   import { CategoryService } from '@/api/blog/categoryApi'
   import { TagService } from '@/api/blog/tagApi'
   // 定义初始表单状态
   const initialFormState = {
-    id: '',
+    id: null,
     articleTitle: '',
     articleContent: '',
     articleAbstract: '',
@@ -231,7 +231,6 @@
   const uploadImageUrl = `${import.meta.env.VITE_API_BASE_URL}/blog/article/admin/articles/images`
   // 传递 token
   const uploadHeaders = { Authorization: accessToken }
-  const cover = ref('') // 图片
 
   // 获取文章类型
   import { useDict, DictType } from '@/utils/dict'
@@ -243,20 +242,20 @@
 
   // 上传成功后的处理函数
   const onSuccess = (response: any) => {
-    cover.value = response.data.url
+    form.articleCover = 'https://' + response.msg
     ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
-  
+
   // 上传失败后的处理函数
   const onError = () => {
     ElMessage.error(`图片上传失败 ${EmojiText[500]}`)
   }
-  
+
   // 上传前的校验函数
   const beforeUpload = (file: File) => {
     const isImage = file.type.startsWith('image/')
     const isLt2M = file.size / 1024 / 1024 < 2
-  
+
     if (!isImage) {
       ElMessage.error('只能上传图片文件!')
       return false
@@ -267,26 +266,26 @@
     }
     return true
   }
-  
+
   // 移除分类
   const removeCategory = () => {
     form.categoryName = null
   }
-  
+
   // 搜索分类
   const searchCategories = (keywords: any, cb: any) => {
     CategoryService.searchCategories(keywords).then((res: any) => {
       cb(res.data)
     })
   }
-  
+
   // 搜索标签
   const searchTags = (keywords: any, cb: any) => {
     TagService.searchTags(keywords).then((res: any) => {
       cb(res.data)
     })
   }
-  
+
   // 保存分类
   const saveCategory = () => {
     if (categoryName.value.trim() != '') {
@@ -296,32 +295,32 @@
       categoryName.value = ''
     }
   }
-  
+
   // 添加分类
   const addCategory = (item: any) => {
     form.categoryName = item.categoryName
   }
-  
+
   // 处理选择的分类
   const handleSelectCategories = (item: any) => {
     addCategory({
       categoryName: item.categoryName
     })
   }
-  
+
   // 移除标签
   const removeTag = (item: any) => {
     const index = form.tagNames.indexOf(item)
     form.tagNames.splice(index, 1)
   }
-  
+
   // 添加标签
   const addTag = (item: any) => {
     if (form.tagNames.indexOf(item.tagName) == -1) {
       form.tagNames.push(item.tagName)
     }
   }
-  
+
   // 保存标签
   const saveTag = () => {
     if (tagName.value.trim() != '') {
@@ -331,19 +330,19 @@
       tagName.value = ''
     }
   }
-  
+
   // 处理选择的标签
   const handleSelectTag = (item: any) => {
     addTag({
       tagName: item.tagName
     })
   }
-  
+
   // 标签样式
   const tagClass = (item: any) => {
     return form.tagNames.indexOf(item.tagName) == -1 ? 'tag-item' : 'tag-item active'
   }
-  
+
   // 列出分类
   const listCategories = async () => {
     const res = await CategoryService.searchCategories()
@@ -356,6 +355,75 @@
     if (res.code === 200) {
       tagList.value = res.data
     }
+  }
+
+  // 验证输入
+  const validateArticle = () => {
+    if (form.articleTitle.trim() == '') {
+      ElMessage.error(`文章标题不能为空`)
+      return false
+    }
+
+    if (form.articleTitle.trim() == '') {
+      ElMessage.error(`文章内容不能为空`)
+      return false
+    }
+
+    if (form.categoryName == null) {
+      ElMessage.error(`文章分类不能为空`)
+      return false
+    }
+
+    if (form.tagNames.length == 0) {
+      ElMessage.error(`文章标签不能为空`)
+      return false
+    }
+
+    if (form.articleCover.trim() == '') {
+      ElMessage.error(`文章封面不能为空`)
+      return false
+    }
+
+    return true
+  }
+
+  // 发布文章
+  const submit = async () => {
+    if (!validateArticle()) {
+      return
+    }
+    const res = await ArticleService.addOrUpdateArticle(form)
+    if (res.code === 200) {
+      ElMessage.success(`${res.msg} ${EmojiText[200]}`)
+      goBack()
+    }
+  }
+
+  const saveArticleDraft = async () => {
+    if (form.articleTitle.trim() == '') {
+      ElMessage.error(`文章标题不能为空`)
+      return
+    }
+
+    if (form.articleTitle.trim() == '') {
+      ElMessage.error(`文章内容不能为空`)
+      return
+    }
+    form.status = 3
+    const res = await ArticleService.addOrUpdateArticle(form)
+    if (res.code === 200) {
+      ElMessage.success(`${res.msg} ${EmojiText[200]}`)
+      goBack()
+    }
+  }
+
+  import { useRouter } from 'vue-router'
+  const router = useRouter()
+  // 返回上一页
+  const goBack = () => {
+    setTimeout(() => {
+      router.go(-1)
+    }, 800)
   }
 
   onMounted(() => {

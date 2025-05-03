@@ -1,12 +1,12 @@
 import request from '@/utils/http'
-import { ArticleInfoResult, ArticleListPageResult } from '@/types/blog/article'
+import { ArticleInfoResult, ArticleRecordResult } from '@/types/blog/article'
 import { CodeMsgResult } from '@/types/axios'
 
 // 文章
 export class ArticleService {
   // 查询文章列表
   static listArticle(query: any) {
-    return request.get<ArticleListPageResult>({
+    return request.get<ArticleRecordResult>({
       url: '/blog/article/admin',
       params: query
     })

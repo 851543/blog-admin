@@ -11,51 +11,16 @@
         <el-form :model="queryParams" ref="queryRef" label-width="82px">
           <el-row :gutter="20">
             <form-input
-              label="作者"
-              prop="userId"
-              v-model="queryParams.userId"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="文章分类"
-              prop="categoryId"
-              v-model="queryParams.categoryId"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="标题"
+              label="文章标题"
               prop="articleTitle"
               v-model="queryParams.articleTitle"
               @keyup.enter="handleQuery"
             />
-            <form-input
-              label="是否置顶 0否 1是"
-              prop="isTop"
-              v-model="queryParams.isTop"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="是否推荐 0否 1是"
-              prop="isFeatured"
-              v-model="queryParams.isFeatured"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="是否删除  0否 1是"
-              prop="isDelete"
-              v-model="queryParams.isDelete"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="访问密码"
-              prop="password"
-              v-model="queryParams.password"
-              @keyup.enter="handleQuery"
-            />
-            <form-input
-              label="原文链接"
-              prop="originalUrl"
-              v-model="queryParams.originalUrl"
+            <form-select
+              label="文章分类"
+              prop="categoryId"
+              v-model="queryParams.status"
+              :options="sysNormalDisable"
               @keyup.enter="handleQuery"
             />
           </el-row>
@@ -79,67 +44,46 @@
       :data="articleList"
       selection
       :total="total"
-      :current-page="queryParams.pageNum"
-      :page-size="queryParams.pageSize"
+      :current-page="queryParams.current"
+      :page-size="queryParams.size"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       @selection-change="handleSelectionChange"
       row-key="id"
     >
       <template #default>
-        <el-table-column label="${comment}" align="center" prop="id" v-if="columns[0].show" />
-        <el-table-column label="作者" align="center" prop="userId" v-if="columns[1].show" />
-        <el-table-column label="文章分类" align="center" prop="categoryId" v-if="columns[2].show" />
+        <el-table-column label="文章作者" align="center" prop="userId" v-if="columns[0].show" />
+        <el-table-column label="文章分类" align="center" prop="categoryId" v-if="columns[1].show" />
+        <el-table-column label="缩略图" align="center" prop="articleCover" v-if="columns[2].show" />
         <el-table-column
-          label="文章缩略图"
+          label="文章标题"
           align="center"
-          prop="articleCover"
+          prop="articleTitle"
           v-if="columns[3].show"
         />
-        <el-table-column label="标题" align="center" prop="articleTitle" v-if="columns[4].show" />
         <el-table-column
-          label="文章摘要，如果该字段为空，默认取文章的前500个字符作为摘要"
+          label="摘要"
           align="center"
           prop="articleAbstract"
+          v-if="columns[4].show"
+        />
+        <el-table-column
+          label="文章内容"
+          align="center"
+          prop="articleContent"
           v-if="columns[5].show"
         />
-        <el-table-column label="内容" align="center" prop="articleContent" v-if="columns[6].show" />
-        <el-table-column
-          label="是否置顶 0否 1是"
-          align="center"
-          prop="isTop"
-          v-if="columns[7].show"
-        />
-        <el-table-column
-          label="是否推荐 0否 1是"
-          align="center"
-          prop="isFeatured"
-          v-if="columns[8].show"
-        />
-        <el-table-column
-          label="是否删除  0否 1是"
-          align="center"
-          prop="isDelete"
-          v-if="columns[9].show"
-        />
-        <el-table-column
-          label="状态值 1公开 2私密 3草稿"
-          align="center"
-          prop="status"
-          v-if="columns[10].show"
-        />
-        <el-table-column
-          label="文章类型 1原创 2转载 3翻译"
-          align="center"
-          prop="type"
-          v-if="columns[11].show"
-        />
-        <el-table-column label="访问密码" align="center" prop="password" v-if="columns[12].show" />
+        <el-table-column label="置顶" align="center" prop="isTop" v-if="columns[6].show" />
+        <el-table-column label="推荐" align="center" prop="isFeatured" v-if="columns[7].show" />
+        <el-table-column label="删除" align="center" prop="isDelete" v-if="columns[8].show" />
+        <el-table-column label="状态" align="center" prop="status" v-if="columns[9].show" />
+        <el-table-column label="类型" align="center" prop="type" v-if="columns[10].show" />
+        <el-table-column label="访问密码" align="center" prop="password" v-if="columns[11].show" />
         <el-table-column
           label="原文链接"
           align="center"
           prop="originalUrl"
-          v-if="columns[13].show"
+          v-if="columns[12].show"
         />
         <el-table-column label="操作" align="center">
           <template #default="scope">
@@ -165,19 +109,18 @@
   import { ref, reactive } from 'vue'
   import { resetForm } from '@/utils/utils'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { FormInstance } from 'element-plus'
   import { ArticleResult } from '@/types/blog/article'
+  import { CategoryService } from '@/api/blog/categoryApi'
+  import { TagService } from '@/api/blog/tagApi'
   const articleList = ref<ArticleResult[]>([])
-  const open = ref(false)
   const loading = ref(true)
   const ids = ref([])
   const multiple = ref(true)
   const total = ref(0)
-  const title = ref('')
   const queryRef = ref()
   const queryParams = reactive({
-    pageNum: 1,
-    pageSize: 10,
+    current: 1,
+    size: 10,
     userId: '',
     categoryId: '',
     articleCover: '',
@@ -186,7 +129,7 @@
     articleContent: '',
     isTop: '',
     isFeatured: '',
-    isDelete: '',
+    isDelete: '0',
     status: '',
     type: '',
     password: '',
@@ -198,25 +141,24 @@
     loading.value = true
     const res = await ArticleService.listArticle(queryParams)
     if (res.code === 200) {
-      articleList.value = res.rows
-      total.value = res.total
+      articleList.value = res.data.records
+      total.value = res.data.count
       loading.value = false
     }
   }
 
   const columns = reactive([
-    { name: '$comment', show: true },
-    { name: '作者', show: true },
-    { name: '文章分类', show: true },
-    { name: '文章缩略图', show: true },
-    { name: '标题', show: true },
-    { name: '文章摘要，如果该字段为空，默认取文章的前500个字符作为摘要', show: true },
-    { name: '内容', show: true },
-    { name: '是否置顶 0否 1是', show: true },
-    { name: '是否推荐 0否 1是', show: true },
-    { name: '是否删除  0否 1是', show: true },
-    { name: '状态值 1公开 2私密 3草稿', show: true },
-    { name: '文章类型 1原创 2转载 3翻译', show: true },
+    { name: '文章作者', show: false },
+    { name: '文章分类', show: false },
+    { name: '缩略图', show: true },
+    { name: '文章标题', show: true },
+    { name: '摘要', show: true },
+    { name: '文章内容', show: true },
+    { name: '置顶', show: true },
+    { name: '推荐', show: true },
+    { name: '删除', show: true },
+    { name: '状态', show: true },
+    { name: '类型', show: true },
     { name: '访问密码', show: true },
     { name: '原文链接', show: true }
   ])
@@ -227,19 +169,19 @@
 
   /** 搜索按钮操作 */
   const handleQuery = () => {
-    queryParams.pageNum = 1
+    queryParams.current = 1
     getList()
   }
 
   /** 每页条数改变 */
   const handleSizeChange = (size: number) => {
-    queryParams.pageSize = size
+    queryParams.size = size
     getList()
   }
 
   /** 当前页改变 */
   const handleCurrentChange = (page: number) => {
-    queryParams.pageNum = page
+    queryParams.current = page
     getList()
   }
 
@@ -256,6 +198,11 @@
     router.push('/blog/article-publish/index/0')
   }
 
+  /** 修改按钮操作 */
+  const handleUpdate = async (row: any) => {
+    router.push('/blog/article-publish/index/' + row.id)
+  }
+
   /** 删除按钮操作 */
   const handleDelete = async (row: any) => {
     const _ids = row.id || ids.value
@@ -266,6 +213,15 @@
         getList()
         ElMessage.success(res.msg)
       }
+    }
+  }
+
+  // 文章分类
+  const categoryOption = ref([])
+  const searchCategories = async () => {
+    const res = await CategoryService.searchCategories()
+    if (res.code === 200) {
+      categoryOption.value = res.data
     }
   }
 
