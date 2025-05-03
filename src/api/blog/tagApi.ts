@@ -1,5 +1,5 @@
 import request from '@/utils/http'
-import { TagRecordResult } from '@/types/blog/tag'
+import { TagRecordResult, TagListResult } from '@/types/blog/tag'
 import { CodeMsgResult } from '@/types/axios'
 
 // 标签
@@ -36,6 +36,14 @@ export class TagService {
         'Content-Type': 'application/json'
       },
       data: id
+    })
+  }
+
+  // 搜索标签
+  static searchTags(query?: any) {
+    return request.get<TagListResult>({
+      url: '/blog/tag/admin/tags/search',
+      params: query
     })
   }
 }

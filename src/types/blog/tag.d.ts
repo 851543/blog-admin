@@ -1,4 +1,4 @@
-import { BaseArrayResult, BaseObjectResult, BasePageResult } from '../axios'
+import { BaseArrayResult, BaseObjectResult, BasePageResult, BaseRecordResult } from '../axios'
 
 export interface TagResult {
   id: string

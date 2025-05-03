@@ -3,7 +3,7 @@
     <el-row>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-form :model="queryParams" ref="queryRef">
-          <el-input placeholder="标签" v-model="queryParams.keywords" @keyup.enter="handleQuery" />
+          <el-input placeholder="标签名称" v-model="queryParams.keywords" @keyup.enter="handleQuery" />
         </el-form>
       </el-col>
       <div style="width: 12px"></div>
@@ -33,7 +33,7 @@
       row-key="id"
     >
       <template #default>
-        <el-table-column label="标签" align="center" prop="tagName" />
+        <el-table-column label="标签名称" align="center" prop="tagName" />
         <el-table-column label="文章量" align="center" prop="articleCount" />
         <el-table-column label="创建时间" align="center" prop="createTime">
           <template #default="scope">
@@ -56,8 +56,8 @@
     <!-- 添加或修改标签对话框 -->
     <el-dialog :title="title" v-model="open" width="500px" append-to-body>
       <el-form ref="tagRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="标签" prop="tagName">
-          <el-input v-model="form.tagName" placeholder="请输入标签" />
+        <el-form-item label="标签名称" prop="tagName">
+          <el-input v-model="form.tagName" placeholder="请输入标签名称" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -101,7 +101,7 @@
     tagName: [
       {
         required: true,
-        message: '标签不能为空',
+        message: '标签名称不能为空',
         trigger: 'blur'
       }
     ]

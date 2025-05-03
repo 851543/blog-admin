@@ -116,5 +116,25 @@ export const asyncRoutes: MenuListType[] = [
         meta: { title: '分配角色', keepAlive: false }
       }
     ]
+  },
+  {
+    id: uuid(),
+    path: '/blog/article-publish',
+    name: 'ArticlePublish',
+    component: RoutesAlias.Home,
+    meta: {
+      title: '文章发布',
+      keepAlive: false,
+      isHide: true
+    }, 
+    children: [
+      {
+        id: uuid(),
+        path: 'index/:articleId(\\d+)',
+        component: RoutesAlias.articlePublish,
+        name: 'ArticlePublishIndex',
+        meta: { title: '文章发布', keepAlive: false }
+      } 
+    ]
   }
 ]

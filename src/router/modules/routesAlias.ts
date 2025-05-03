@@ -15,5 +15,6 @@ export enum RoutesAlias {
   DictData = '/system/dict/data', // 字典数据
   AuthRole = '/system/user/authRole', // 用户授权角色
   JobLog = '/monitor/job/log', // 调度日志
-  OutsideIframe = '/outside/iframe' // 外部iframe
+  OutsideIframe = '/outside/iframe', // 外部iframe
+  articlePublish = '/blog/article/publish' // 文章发布
 }
