@@ -6,7 +6,7 @@ import { SystemConfig } from '../types'
 export const createBaseConfig = (): SystemConfig => ({
   // 系统信息
   systemInfo: {
-    name: 'Admin-Vue3',
+    name: 'blog-admin',
     login: {
       username: '',
       password: '',
