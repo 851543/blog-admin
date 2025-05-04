@@ -17,7 +17,7 @@
                 v-for="dict in articleType"
                 :key="dict.value"
                 :label="dict.label"
-                :value="dict.value"
+                :value="Number(dict.value)"
               />
             </el-select>
           </el-col>
@@ -159,7 +159,7 @@
                 :inactive-value="0"
               />
             </el-form-item>
-            <el-form-item label="原文地址" v-if="form.type != '1'">
+            <el-form-item label="原文地址" v-if="form.type != 1">
               <el-input v-model="form.originalUrl" placeholder="请填写原文链接" />
             </el-form-item>
             <el-form-item label="发布形式">
@@ -181,7 +181,7 @@
             </el-form-item>
           </el-form>
           <div style="display: flex; justify-content: flex-end">
-            <el-button @click="saveArticleDraft" v-if="form.id == null || form.status == 3">
+            <el-button @click="saveArticleDraft" v-if="form.id == 0 || form.status == 3">
               保存
             </el-button>
             <el-button type="primary" @click="submit" style="width: 100px"> 发布 </el-button>
@@ -202,7 +202,7 @@
   import { TagService } from '@/api/blog/tagApi'
   // 定义初始表单状态
   const initialFormState = {
-    id: null,
+    id: 0,
     articleTitle: '',
     articleContent: '',
     articleAbstract: '',
@@ -211,7 +211,7 @@
     tagNames: [] as string[],
     isTop: 0,
     isFeatured: 0,
-    type: '1',
+    type: 1,
     status: 1,
     password: '',
     originalUrl: ''
@@ -426,10 +426,25 @@
     }, 800)
   }
 
+  import { useRoute } from 'vue-router'
+  const route = useRoute()
+  // 详细文章
+  const getArticleDetail = async () => {
+    form.id = Number(route.params && route.params.articleId)
+    if (form.id == 0) {
+      return
+    }
+    const res = await ArticleService.getArticle(form.id)
+    if (res.code === 200) {
+      Object.assign(form, res.data)
+    }
+  }
+
   onMounted(() => {
     getuseDict()
     listCategories()
     listTags()
+    getArticleDetail()
   })
 </script>
 

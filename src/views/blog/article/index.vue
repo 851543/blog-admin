@@ -19,23 +19,50 @@
             <form-select
               label="文章分类"
               prop="categoryId"
-              v-model="queryParams.status"
-              :options="sysNormalDisable"
-              @keyup.enter="handleQuery"
+              v-model="queryParams.categoryId"
+              :options="categoryOption"
             />
+            <form-select
+              label="文章标签"
+              prop="status"
+              v-model="queryParams.tagId"
+              :options="tagOption"
+            />
+            <form-select
+              label="文章类型"
+              prop="type"
+              v-model="queryParams.type"
+              :options="articleType"
+            />
+            <el-col :xs="24" :sm="12" :lg="6">
+              <el-form-item label="&nbsp;" />
+            </el-col>
           </el-row>
         </el-form>
       </template>
       <template #bottom>
-        <el-button @click="handleAdd" v-auth="['blog:article:add']" v-ripple>新增 </el-button>
-        <el-button
-          @click="handleDelete"
-          :disabled="multiple"
-          v-auth="['blog:article:remove']"
-          v-ripple
-          >删除
-        </el-button>
-        <el-button @click="handleExport" v-auth="['blog:article:export']" v-ripple>导出 </el-button>
+        <div class="button-group">
+          <el-button @click="handleAdd" v-auth="['blog:article:add']" v-ripple>新增 </el-button>
+          <el-button
+            @click="handleDelete"
+            :disabled="multiple"
+            v-auth="['blog:article:remove']"
+            v-ripple
+            >删除
+          </el-button>
+          <el-button @click="handleExport" v-auth="['blog:article:export']" v-ripple
+            >导出
+          </el-button>
+          <div class="center-radio-group">
+            <el-radio-group v-model="queryParams.status" @change="handleStatusChange">
+              <el-radio-button value="">全部</el-radio-button>
+              <el-radio-button value="1">公开</el-radio-button>
+              <el-radio-button value="2">私密</el-radio-button>
+              <el-radio-button value="3">草稿</el-radio-button>
+              <el-radio-button value="4">回收站</el-radio-button>
+            </el-radio-group>
+          </div>
+        </div>
       </template>
     </table-bar>
 
@@ -53,13 +80,31 @@
     >
       <template #default>
         <el-table-column label="文章作者" align="center" prop="userId" v-if="columns[0].show" />
-        <el-table-column label="文章分类" align="center" prop="categoryId" v-if="columns[1].show" />
-        <el-table-column label="缩略图" align="center" prop="articleCover" v-if="columns[2].show" />
+        <el-table-column label="缩略图" align="center" prop="articleCover" v-if="columns[2].show">
+          <template #default="scope">
+            <el-image class="article-cover" :src="scope.row.articleCover" />
+            <i
+              v-if="scope.row.status == '1'"
+              class="iconfont el-icon-mygongkai article-status-icon"
+            />
+            <i v-if="scope.row.status == '2'" class="iconfont el-icon-mymima article-status-icon" />
+            <i
+              v-if="scope.row.status == '3'"
+              class="iconfont el-icon-mycaogaoxiang article-status-icon"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           label="文章标题"
           align="center"
           prop="articleTitle"
           v-if="columns[3].show"
+        />
+        <el-table-column
+          label="文章分类"
+          align="center"
+          prop="categoryName"
+          v-if="columns[1].show"
         />
         <el-table-column
           label="摘要"
@@ -73,11 +118,35 @@
           prop="articleContent"
           v-if="columns[5].show"
         />
-        <el-table-column label="置顶" align="center" prop="isTop" v-if="columns[6].show" />
-        <el-table-column label="推荐" align="center" prop="isFeatured" v-if="columns[7].show" />
+        <el-table-column label="置顶" align="center" prop="isTop" v-if="columns[6].show">
+          <template #default="scope">
+            <el-switch
+              :disabled="scope.row.isDelete == 1"
+              v-model="scope.row.isTop"
+              :active-value="0"
+              :inactive-value="1"
+              @change="updateTopOrFeaturedChange(scope.row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="推荐" align="center" prop="isFeatured" v-if="columns[7].show">
+          <template #default="scope">
+            <el-switch
+              :disabled="scope.row.isDelete == 1"
+              v-model="scope.row.isFeatured"
+              :active-value="0"
+              :inactive-value="1"
+              @change="updateTopOrFeaturedChange(scope.row)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column label="删除" align="center" prop="isDelete" v-if="columns[8].show" />
         <el-table-column label="状态" align="center" prop="status" v-if="columns[9].show" />
-        <el-table-column label="类型" align="center" prop="type" v-if="columns[10].show" />
+        <el-table-column label="类型" align="center" prop="type" v-if="columns[10].show">
+          <template #default="scope">
+            <dict-tag :options="articleType" :value="scope.row.status" />
+          </template>
+        </el-table-column>
         <el-table-column label="访问密码" align="center" prop="password" v-if="columns[11].show" />
         <el-table-column
           label="原文链接"
@@ -85,13 +154,32 @@
           prop="originalUrl"
           v-if="columns[12].show"
         />
+        <el-table-column label="浏览量" align="center" prop="viewsCount" v-if="columns[13].show" />
+        <el-table-column
+          label="创建时间"
+          align="center"
+          prop="createTime"
+          v-if="columns[14].show"
+        >
+          <template #default="scope">
+            {{ parseTime(scope.row.createTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="文章标签"
+          align="center"
+          prop="tagDTOs[0].tagName"
+          v-if="columns[15].show"
+        />
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <button-table
+              v-if="!deleteBut"
               type="edit"
               v-auth="['blog:article:edit']"
               @click="handleUpdate(scope.row)"
             />
+            <button-table v-else type="add" icon="&#xe708;" @click="handleRestore(scope.row)" />
             <button-table
               type="delete"
               v-auth="['blog:article:remove']"
@@ -103,7 +191,6 @@
     </art-table>
   </div>
 </template>
-
 <script setup lang="ts">
   import { ArticleService } from '@/api/blog/articleApi'
   import { ref, reactive } from 'vue'
@@ -112,28 +199,24 @@
   import { ArticleResult } from '@/types/blog/article'
   import { CategoryService } from '@/api/blog/categoryApi'
   import { TagService } from '@/api/blog/tagApi'
+  import { parseTime } from '@/utils/utils'
   const articleList = ref<ArticleResult[]>([])
   const loading = ref(true)
   const ids = ref([])
   const multiple = ref(true)
   const total = ref(0)
   const queryRef = ref()
+  const deleteBut = ref(false)
   const queryParams = reactive({
     current: 1,
     size: 10,
-    userId: '',
-    categoryId: '',
-    articleCover: '',
     articleTitle: '',
-    articleAbstract: '',
-    articleContent: '',
-    isTop: '',
-    isFeatured: '',
-    isDelete: '0',
-    status: '',
+    categoryId: '',
+    tagId: '',
+    is: '',
     type: '',
-    password: '',
-    originalUrl: ''
+    status: '',
+    isDelete: 0
   })
 
   /** 查询文章列表 */
@@ -149,18 +232,21 @@
 
   const columns = reactive([
     { name: '文章作者', show: false },
-    { name: '文章分类', show: false },
+    { name: '文章分类', show: true },
     { name: '缩略图', show: true },
     { name: '文章标题', show: true },
-    { name: '摘要', show: true },
-    { name: '文章内容', show: true },
+    { name: '摘要', show: false },
+    { name: '文章内容', show: false },
     { name: '置顶', show: true },
     { name: '推荐', show: true },
-    { name: '删除', show: true },
-    { name: '状态', show: true },
+    { name: '删除', show: false },
+    { name: '状态', show: false },
     { name: '类型', show: true },
-    { name: '访问密码', show: true },
-    { name: '原文链接', show: true }
+    { name: '访问密码', show: false },
+    { name: '原文链接', show: false },
+    { name: '浏览量', show: true },
+    { name: '创建时间', show: true },
+    { name: '文章标签', show: true }
   ])
 
   const changeColumn = (list: any) => {
@@ -195,19 +281,31 @@
   const router = useRouter()
   /** 新增按钮操作 */
   const handleAdd = () => {
-    router.push('/blog/article-publish/index/0')
+    router.push({ path: '/blog/article-publish/index/0', query: { current: queryParams.current } })
   }
 
   /** 修改按钮操作 */
   const handleUpdate = async (row: any) => {
-    router.push('/blog/article-publish/index/' + row.id)
+    router.push({
+      path: '/blog/article-publish/index/' + row.id,
+      query: { current: queryParams.current }
+    })
   }
 
   /** 删除按钮操作 */
   const handleDelete = async (row: any) => {
-    const _ids = row.id || ids.value
-    const Tr = await ElMessageBox.confirm('是否确认删除文章编号为"' + _ids + '"的数据项？')
-    if (Tr) {
+    const _ids = row.id ? [row.id] : ids.value
+    const Tr = await ElMessageBox.confirm(
+      `是否确认${deleteBut.value ? ' （彻底） ' : ''}删除文章编号为"${_ids}"的数据项？`
+    )
+    if (Tr && !deleteBut.value) {
+      const res = await ArticleService.updateArticle({ ids: _ids, isDelete: 1 })
+      if (res.code === 200) {
+        getList()
+        ElMessage.success(res.msg)
+      }
+    }
+    if (Tr && deleteBut.value) {
       const res = await ArticleService.deleteArticle(_ids)
       if (res.code === 200) {
         getList()
@@ -216,24 +314,119 @@
     }
   }
 
-  // 文章分类
-  const categoryOption = ref([])
-  const searchCategories = async () => {
-    const res = await CategoryService.searchCategories()
-    if (res.code === 200) {
-      categoryOption.value = res.data
+  /** 恢复按钮操作 */
+  const handleRestore = async (row: any) => {
+    const _ids = row.id ? [row.id] : ids.value
+    const Tr = await ElMessageBox.confirm('是否确认恢复文章编号为"' + _ids + '"的数据项？')
+    if (Tr) {
+      const res = await ArticleService.updateArticle({ ids: _ids, isDelete: 0 })
+      if (res.code === 200) {
+        getList()
+        ElMessage.success(res.msg)
+      }
     }
   }
 
-  import { downloadExcel } from '@/utils/utils'
+  // 文章分类
+  const categoryOption = ref<any>([])
+  const searchCategories = async () => {
+    const res = await CategoryService.searchCategories()
+    if (res.code === 200) {
+      categoryOption.value = res.data.map((item: any) => {
+        return {
+          label: item.categoryName,
+          value: item.id
+        }
+      })
+    }
+  }
+
+  // 文章标签
+  const tagOption = ref<any>([])
+  const searchTags = async () => {
+    const res = await TagService.searchTags()
+    if (res.code === 200) {
+      tagOption.value = res.data.map((item: any) => {
+        return {
+          label: item.tagName,
+          value: item.id
+        }
+      })
+    }
+  }
+
+  // 获取文章类型
+  import { useDict, DictType } from '@/utils/dict'
+  const articleType = ref<DictType[]>([]) // 系统字典数据
+  const getuseDict = async () => {
+    const { article_type } = await useDict('article_type')
+    articleType.value = article_type
+  }
+
+  /** 状态切换操作 */
+  const handleStatusChange = () => {
+    // 如果选择回收站，设置isDelete为1
+    if (queryParams.status === '4') {
+      deleteBut.value = true
+      queryParams.status = ''
+      queryParams.isDelete = 1
+      getList()
+      return (queryParams.status = '4')
+    } else {
+      queryParams.isDelete = 0
+    }
+    deleteBut.value = false
+    queryParams.current = 1
+    getList()
+  }
+
+  /** 置顶/推荐切换操作 */
+  const updateTopOrFeaturedChange = async (row: any) => {
+    const res = await ArticleService.updateTopOrFeatured({
+      id: row.id,
+      isTop: row.isTop,
+      isFeatured: row.isFeatured
+    })
+    if (res.code === 200) {
+      ElMessage.success(res.msg)
+      getList()
+    }
+  }
 
   /** 导出按钮操作 */
   const handleExport = () => {
-    downloadExcel(ArticleService.exportExcel(queryParams))
+    // 暂时未开发
+    ElMessage.warning('暂未开发')
   }
+
+  import { useRoute } from 'vue-router'
+  const route = useRoute()
+  onActivated(() => {
+    if (route.query.current) {
+      queryParams.current == Number(route.query.current)
+    }
+  })
 
   // 初始化
   onMounted(() => {
+    searchCategories()
+    searchTags()
+    getuseDict()
     getList()
   })
 </script>
+<style scoped>
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .center-radio-group {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 16px;
+  }
+</style>

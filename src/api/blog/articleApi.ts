@@ -15,8 +15,7 @@ export class ArticleService {
   // 查询文章详细
   static getArticle(id: any) {
     return request.get<ArticleInfoResult>({
-      url: '/blog/article/admin/',
-      params: id
+      url: '/blog/article/admin/' + id
     })
   }
 
@@ -28,11 +27,34 @@ export class ArticleService {
     })
   }
 
-  // 删除文章
-  static deleteArticle(id: any) {
-    return request.del<CodeMsgResult>({
-      url: '/blog/article/' + id
+  // 逻辑删除或恢复文章
+  static updateArticle(data: any) {
+    return request.put<CodeMsgResult>({
+      url: '/blog/article/admin',
+      data: data
     })
+  }
+
+  // 删除文章
+  static deleteArticle(ids: Array<number>) {
+    return request.del<CodeMsgResult>({
+      url: '/blog/article/admin/delete',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: ids
+    })
+  }
+
+  // 置顶或推荐文章
+  static updateTopOrFeatured(data: any) {
+    return request.put<CodeMsgResult>({
+      url: '/blog/article/admin/topAndFeatured',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: data
+    }) 
   }
 
   // 导出文章列表
