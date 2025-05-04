@@ -13,7 +13,7 @@
             <form-input
               label="文章标题"
               prop="articleTitle"
-              v-model="queryParams.articleTitle"
+              v-model="queryParams.keywords"
               @keyup.enter="handleQuery"
             />
             <form-select
@@ -155,12 +155,7 @@
           v-if="columns[12].show"
         />
         <el-table-column label="浏览量" align="center" prop="viewsCount" v-if="columns[13].show" />
-        <el-table-column
-          label="创建时间"
-          align="center"
-          prop="createTime"
-          v-if="columns[14].show"
-        >
+        <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[14].show">
           <template #default="scope">
             {{ parseTime(scope.row.createTime) }}
           </template>
@@ -210,10 +205,9 @@
   const queryParams = reactive({
     current: 1,
     size: 10,
-    articleTitle: '',
+    keywords: '',
     categoryId: '',
     tagId: '',
-    is: '',
     type: '',
     status: '',
     isDelete: 0
@@ -222,7 +216,11 @@
   /** 查询文章列表 */
   const getList = async () => {
     loading.value = true
-    const res = await ArticleService.listArticle(queryParams)
+    const query = { ...queryParams }
+    if (query.status === '4') {
+      query.status = ''
+    }
+    const res = await ArticleService.listArticle(query)
     if (res.code === 200) {
       articleList.value = res.data.records
       total.value = res.data.count
@@ -368,14 +366,11 @@
     // 如果选择回收站，设置isDelete为1
     if (queryParams.status === '4') {
       deleteBut.value = true
-      queryParams.status = ''
       queryParams.isDelete = 1
-      getList()
-      return (queryParams.status = '4')
     } else {
+      deleteBut.value = false
       queryParams.isDelete = 0
     }
-    deleteBut.value = false
     queryParams.current = 1
     getList()
   }
