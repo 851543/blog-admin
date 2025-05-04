@@ -436,6 +436,7 @@
     }
     const res = await ArticleService.getArticle(form.id)
     if (res.code === 200) {
+      res.data.status = res.data.status == '3' ? '1' : res.data.status
       Object.assign(form, res.data)
     }
   }

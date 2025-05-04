@@ -82,15 +82,9 @@
         <el-table-column label="文章作者" align="center" prop="userId" v-if="columns[0].show" />
         <el-table-column label="缩略图" align="center" prop="articleCover" v-if="columns[2].show">
           <template #default="scope">
-            <el-image class="article-cover" :src="scope.row.articleCover" />
-            <i
-              v-if="scope.row.status == '1'"
-              class="iconfont el-icon-mygongkai article-status-icon"
-            />
-            <i v-if="scope.row.status == '2'" class="iconfont el-icon-mymima article-status-icon" />
-            <i
-              v-if="scope.row.status == '3'"
-              class="iconfont el-icon-mycaogaoxiang article-status-icon"
+            <el-image
+              class="article-cover"
+              :src="scope.row.articleCover ? scope.row.articleCover : defaultAvatar"
             />
           </template>
         </el-table-column>
@@ -123,8 +117,8 @@
             <el-switch
               :disabled="scope.row.isDelete == 1"
               v-model="scope.row.isTop"
-              :active-value="0"
-              :inactive-value="1"
+              :active-value="1"
+              :inactive-value="0"
               @change="updateTopOrFeaturedChange(scope.row)"
             />
           </template>
@@ -134,8 +128,8 @@
             <el-switch
               :disabled="scope.row.isDelete == 1"
               v-model="scope.row.isFeatured"
-              :active-value="0"
-              :inactive-value="1"
+              :active-value="1"
+              :inactive-value="0"
               @change="updateTopOrFeaturedChange(scope.row)"
             />
           </template>
@@ -195,6 +189,7 @@
   import { CategoryService } from '@/api/blog/categoryApi'
   import { TagService } from '@/api/blog/tagApi'
   import { parseTime } from '@/utils/utils'
+  import defaultAvatar from '@/assets/img/avatar/default-avatar.png'
   const articleList = ref<ArticleResult[]>([])
   const loading = ref(true)
   const ids = ref([])
