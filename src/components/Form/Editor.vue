@@ -28,6 +28,13 @@
 
   const modelValue = defineModel<string>({ required: true })
 
+  const prop = defineProps({
+    action: {
+      type: String,
+      default: ''
+    }
+  })
+
   // 编辑器实例
   const editorRef = shallowRef()
   let mode = ref('default')
@@ -35,7 +42,7 @@
   // token
   let { accessToken } = userStore
   // 图片上传地址
-  let server = `${import.meta.env.VITE_API_URL}/api/common/upload/wangeditor`
+  let server = prop.action
 
   const toolbarConfig = {
     // 重新配置工具栏，显示哪些菜单，以及菜单的排序、分组。

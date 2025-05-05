@@ -288,7 +288,7 @@
   let { accessToken } = userStore
   const headers = { Authorization: accessToken }
 
-  const uploadImageUrl = `${import.meta.env.VITE_API_BASE_URL}/blog/article/admin/articles/images`
+  const uploadImageUrl = `${import.meta.env.VITE_API_BASE_URL}/admin/config/images`
 
   const getWebsiteConfig = async () => {
     const res = await WebsiteService.getWebsiteInfo()

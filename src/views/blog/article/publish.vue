@@ -364,7 +364,7 @@
       return false
     }
 
-    if (form.articleTitle.trim() == '') {
+    if (form.articleContent.trim() == '<p><br></p>') {
       ElMessage.error(`文章内容不能为空`)
       return false
     }
@@ -387,11 +387,16 @@
     return true
   }
 
+  const delCodeTrim = (content: string): string => {
+    return content.replace(/(\s*)<\/code>/g, '</code>')
+  }
+
   // 发布文章
   const submit = async () => {
     if (!validateArticle()) {
       return
     }
+    form.articleContent = delCodeTrim(form.articleContent)
     const res = await ArticleService.addOrUpdateArticle(form)
     if (res.code === 200) {
       ElMessage.success(`${res.msg} ${EmojiText[200]}`)
@@ -409,6 +414,7 @@
       ElMessage.error(`文章内容不能为空`)
       return
     }
+    form.articleContent = delCodeTrim(form.articleContent)
     form.status = 3
     const res = await ArticleService.addOrUpdateArticle(form)
     if (res.code === 200) {
