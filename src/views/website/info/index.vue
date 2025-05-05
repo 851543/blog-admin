@@ -6,7 +6,7 @@
           <el-form-item label="作者头像">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
+              :action="uploadImageUrl"
               :headers="headers"
               :show-file-list="false"
               :before-upload="beforeUpload"
@@ -22,7 +22,7 @@
           <el-form-item label="网站logo">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
+              :action="uploadImageUrl"
               :headers="headers"
               :show-file-list="false"
               :before-upload="beforeUpload"
@@ -38,7 +38,7 @@
           <el-form-item label="favicon">
             <el-upload
               class="avatar-uploader"
-              action="/api/admin/config/images"
+              :action="uploadImageUrl"
               :headers="headers"
               :show-file-list="false"
               :before-upload="beforeUpload"
@@ -86,13 +86,16 @@
               placeholder="选择日期"
             />
           </el-form-item>
-          <form-input
-            label="网站公告"
-            prop="notice"
-            v-model="websiteConfigForm.notice"
-            type="textarea"
-            :rows="5"
-          />
+          <el-col :xs="24" :sm="12" :lg="6">
+            <el-form-item label="网站公告" prop="notice">
+              <el-input
+                placeholder="请输入网站公告"
+                type="textarea"
+                v-model="websiteConfigForm.notice"
+                :rows="5"
+              />
+            </el-form-item>
+          </el-col>
           <form-input
             label="工信部备案号"
             prop="beianNumber"
@@ -105,16 +108,11 @@
           />
           <el-form-item label="qq登录">
             <el-radio-group v-model="websiteConfigForm.qqLogin">
-              <el-radio :label="0">关闭</el-radio>
-              <el-radio :label="1">开启</el-radio>
+              <el-radio :value="0">关闭</el-radio>
+              <el-radio :value="1">开启</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-button
-            type="primary"
-            size="medium"
-            style="margin-left: 6.3rem"
-            @click="updateWebsiteConfig"
-          >
+          <el-button type="primary" style="margin-left: 6.3rem" @click="updateWebsiteConfig">
             修改
           </el-button>
         </el-form>
@@ -135,12 +133,7 @@
             prop="stackoverflow"
             v-model="websiteConfigForm.stackoverflow"
           />
-          <el-button
-            type="primary"
-            size="medium"
-            style="margin-left: 4.375rem"
-            @click="updateWebsiteConfig"
-          >
+          <el-button type="primary" style="margin-left: 4.375rem" @click="updateWebsiteConfig">
             修改
           </el-button>
         </el-form>
@@ -152,7 +145,7 @@
               <el-form-item label="用户头像">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="uploadImageUrl"
                   :headers="headers"
                   :show-file-list="false"
                   :before-upload="beforeUpload"
@@ -170,7 +163,7 @@
               <el-form-item label="游客头像">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="uploadImageUrl"
                   :headers="headers"
                   :show-file-list="false"
                   :before-upload="beforeUpload"
@@ -187,20 +180,20 @@
           </el-row>
           <el-form-item label="邮箱通知">
             <el-radio-group v-model="websiteConfigForm.isEmailNotice">
-              <el-radio :label="1">开启</el-radio>
-              <el-radio :label="0">关闭</el-radio>
+              <el-radio :value="1">开启</el-radio>
+              <el-radio :value="0">关闭</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="评论审核">
             <el-radio-group v-model="websiteConfigForm.isCommentReview">
-              <el-radio :label="1">开启</el-radio>
-              <el-radio :label="0">关闭</el-radio>
+              <el-radio :value="1">开启</el-radio>
+              <el-radio :value="0">关闭</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="打赏状态">
             <el-radio-group v-model="websiteConfigForm.isReward">
-              <el-radio :label="1">开启</el-radio>
-              <el-radio :label="0">关闭</el-radio>
+              <el-radio :value="1">开启</el-radio>
+              <el-radio :value="0">关闭</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-row style="width: 600px" v-show="websiteConfigForm.isReward == 1">
@@ -208,7 +201,7 @@
               <el-form-item label="微信收款码">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="uploadImageUrl"
                   :headers="headers"
                   :show-file-list="false"
                   :before-upload="beforeUpload"
@@ -219,7 +212,6 @@
                     <div class="upload-text">点击上传收款码</div>
                   </div>
                   <img v-else :src="websiteConfigForm.weiXinQRCode" class="avatar" />
-
                 </el-upload>
               </el-form-item>
             </el-col>
@@ -227,28 +219,23 @@
               <el-form-item label="支付宝收款码">
                 <el-upload
                   class="avatar-uploader"
-                  action="/api/admin/config/images"
+                  :action="uploadImageUrl"
                   :headers="headers"
                   :show-file-list="false"
                   :before-upload="beforeUpload"
                   :on-success="handleAlipaySuccess"
+                  :on-error="onError"
                 >
                   <div v-if="!websiteConfigForm.alipayQRCode" class="upload-placeholder">
                     <el-icon class="upload-icon"><Plus /></el-icon>
                     <div class="upload-text">点击上传收款码</div>
                   </div>
                   <img v-else :src="websiteConfigForm.alipayQRCode" class="avatar" />
-
                 </el-upload>
               </el-form-item>
             </el-col>
           </el-row>
-          <el-button
-            type="primary"
-            size="medium"
-            style="margin-left: 6.3rem"
-            @click="updateWebsiteConfig"
-          >
+          <el-button type="primary" style="margin-left: 6.3rem" @click="updateWebsiteConfig">
             修改
           </el-button>
         </el-form>
@@ -257,72 +244,121 @@
   </el-card>
 </template>
 
-<script setup>
-  import { ref, onMounted } from 'vue'
-  import axios from 'axios'
-  const websiteConfigForm = ref({})
+<script setup lang="ts">
+  import { Plus } from '@element-plus/icons-vue'
+  import WebsiteService from '@/api/website/websiteApi'
+  import { useUserStore } from '@/store/modules/user'
+  import { WebsiteResult } from '@/types/website/website'
+  import EmojiText from '@/utils/emojo'
+  const websiteConfigForm = ref<WebsiteResult>({
+    name: '',
+    englishName: '',
+    author: '',
+    authorAvatar: '',
+    authorIntro: '',
+    logo: '',
+    multiLanguage: 0,
+    notice: '',
+    websiteCreateTime: '',
+    beianNumber: '',
+    qqLogin: 0,
+    github: '',
+    gitee: '',
+    qq: '',
+    weChat: '',
+    weibo: '',
+    csdn: '',
+    zhihu: '',
+    juejin: '',
+    twitter: '',
+    stackoverflow: '',
+    touristAvatar: '',
+    userAvatar: '',
+    isCommentReview: 0,
+    isEmailNotice: 0,
+    isReward: 0,
+    weiXinQRCode: '',
+    alipayQRCode: '',
+    favicon: '',
+    websiteTitle: '',
+    gonganBeianNumber: ''
+  })
   const activeName = ref('info')
-  const headers = ref({ Authorization: 'Bearer ' + sessionStorage.getItem('token') })
+  const userStore = useUserStore()
+  let { accessToken } = userStore
+  const headers = { Authorization: accessToken }
 
-  const getWebsiteConfig = () => {
-    axios.get('/api/admin/website/config').then(({ data }) => {
-      websiteConfigForm.value = data.data
-    })
+  const uploadImageUrl = `${import.meta.env.VITE_API_BASE_URL}/blog/article/admin/articles/images`
+
+  const getWebsiteConfig = async () => {
+    const res = await WebsiteService.getWebsiteInfo()
+    if (res.code === 200) {
+      websiteConfigForm.value = res.data
+    }
   }
 
-  const handleAuthorAvatarSuccess = (response) => {
-    websiteConfigForm.value.authorAvatar = response.data
+  const handleAuthorAvatarSuccess = (response: any) => {
+    websiteConfigForm.value.authorAvatar = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleFaviconSuccess = (response) => {
-    websiteConfigForm.value.favicon = response.data
+  const handleFaviconSuccess = (response: any) => {
+    websiteConfigForm.value.favicon = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleLogoSuccess = (response) => {
-    websiteConfigForm.value.logo = response.data
+  const handleLogoSuccess = (response: any) => {
+    websiteConfigForm.value.logo = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleUserAvatarSuccess = (response) => {
-    websiteConfigForm.value.userAvatar = response.data
+  const handleUserAvatarSuccess = (response: any) => {
+    websiteConfigForm.value.userAvatar = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleTouristAvatarSuccess = (response) => {
-    websiteConfigForm.value.touristAvatar = response.data
+  const handleTouristAvatarSuccess = (response: any) => {
+    websiteConfigForm.value.touristAvatar = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleWeiXinSuccess = (response) => {
-    websiteConfigForm.value.weiXinQRCode = response.data
+  const handleWeiXinSuccess = (response: any) => {
+    websiteConfigForm.value.weiXinQRCode = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const handleAlipaySuccess = (response) => {
-    websiteConfigForm.value.alipayQRCode = response.data
+  const handleAlipaySuccess = (response: any) => {
+    websiteConfigForm.value.alipayQRCode = response.msg
+    ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
-  const beforeUpload = (file) => {
-    return new Promise((resolve) => {
-      if (file.size / 1024 < config.UPLOAD_SIZE) {
-        resolve(file)
-      }
-      imageConversion.compressAccurately(file, config.UPLOAD_SIZE).then((res) => {
-        resolve(res)
-      })
-    })
+  // 上传失败后的处理函数
+  const onError = () => {
+    ElMessage.error(`图片上传失败 ${EmojiText[500]}`)
   }
 
-  const updateWebsiteConfig = () => {
-    axios.put('/api/admin/website/config', websiteConfigForm.value).then(({ data }) => {
-      if (data.flag) {
-        this.$notify.success({
-          title: '成功',
-          message: data.message
-        })
-      } else {
-        this.$notify.error({
-          title: '失败',
-          message: data.message
-        })
-      }
-    })
+  // 上传前的校验函数
+  const beforeUpload = (file: File) => {
+    const isImage = file.type.startsWith('image/')
+    const isLt2M = file.size / 1024 / 1024 < 2
+
+    if (!isImage) {
+      ElMessage.error('只能上传图片文件!')
+      return false
+    }
+    if (!isLt2M) {
+      ElMessage.error('图片大小不能超过 2MB!')
+      return false
+    }
+    return true
+  }
+
+  const updateWebsiteConfig = async () => {
+    const res = await WebsiteService.updateWebsiteInfo(websiteConfigForm.value)
+    if (res.code === 200) {
+      ElMessage.success(res.msg)
+      getWebsiteConfig()
+    }
   }
 
   onMounted(() => {
@@ -345,12 +381,12 @@
     height: 140px;
     border: 1px dashed #d9d9d9;
     border-radius: 8px;
-    
+
     .upload-icon {
       font-size: 24px;
       color: #909399;
     }
-    
+
     .upload-text {
       margin-top: 8px;
       font-size: 14px;

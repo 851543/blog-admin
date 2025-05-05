@@ -242,7 +242,7 @@
 
   // 上传成功后的处理函数
   const onSuccess = (response: any) => {
-    form.articleCover = 'https://' + response.msg
+    form.articleCover = response.msg
     ElMessage.success(`图片上传成功 ${EmojiText[200]}`)
   }
 
