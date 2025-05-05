@@ -419,4 +419,10 @@
     transform: translateX(-50%);
     padding: 0 16px;
   }
+  .article-cover {
+    position: relative;
+    width: 100%;
+    height: 90px;
+    border-radius: 4px;
+  }
 </style>

@@ -4,7 +4,7 @@
       <el-col :xs="24" :sm="12" :lg="6">
         <el-form :model="queryParams" ref="queryRef">
           <el-input
-            placeholder="分类名称"
+            placeholder="请输入分类名称"
             v-model="queryParams.keywords"
             @keyup.enter="handleQuery"
           />

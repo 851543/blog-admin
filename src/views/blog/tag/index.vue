@@ -3,7 +3,7 @@
     <el-row>
       <el-col :xs="24" :sm="12" :lg="6">
         <el-form :model="queryParams" ref="queryRef">
-          <el-input placeholder="标签名称" v-model="queryParams.keywords" @keyup.enter="handleQuery" />
+          <el-input placeholder="请输入标签名称" v-model="queryParams.keywords" @keyup.enter="handleQuery" />
         </el-form>
       </el-col>
       <div style="width: 12px"></div>
