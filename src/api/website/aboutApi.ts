@@ -10,14 +10,14 @@ class AboutService {
   // 关于
   static getAbout() {
     return request.get<BaseObjectResult<About>>({
-      url: '/about'
+      url: '/blog/website/about'
     })
   }
 
   // 修改关于
   static updateAbout(data: any) {
     return request.put<CodeMsgResult>({
-      url: '/admin/about',
+      url: '/blog/website/admin/about',
       data
     })
   }
