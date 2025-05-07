@@ -126,15 +126,47 @@ export const asyncRoutes: MenuListType[] = [
       title: '文章发布',
       keepAlive: false,
       isHide: true
-    }, 
+    },
     children: [
       {
         id: uuid(),
         path: 'index/:articleId(\\d+)',
-        component: RoutesAlias.articlePublish,
+        component: RoutesAlias.ArticlePublish,
         name: 'ArticlePublishIndex',
         meta: { title: '文章发布', keepAlive: false }
-      } 
+      }
     ]
+  },
+  {
+    id: uuid(),
+    path: '/photo/photo',
+    name: 'PhotoList',
+    component: RoutesAlias.Home,
+    meta: {
+      title: '照片管理',
+      keepAlive: false,
+      isHide: true
+    },
+    children: [
+      {
+        id: uuid(),
+        path: 'index/:albumId(\\d+)',
+        component: RoutesAlias.Photo,
+        name: 'PhotoIndex',
+        meta: { title: '照片管理', keepAlive: false }
+      }
+    ]
+  },
+  {
+    id: uuid(),
+    path: '/photo-delete',
+    name: 'PhotoDelete',
+    component: RoutesAlias.PhotoDelete,
+    meta: {
+      title: '照片回收站',
+      keepAlive: false,
+      isHide: true,
+      isInMainContainer: true
+    }
   }
 ]

@@ -16,5 +16,7 @@ export enum RoutesAlias {
   AuthRole = '/system/user/authRole', // 用户授权角色
   JobLog = '/monitor/job/log', // 调度日志
   OutsideIframe = '/outside/iframe', // 外部iframe
-  articlePublish = '/blog/article/publish' // 文章发布
+  ArticlePublish = '/blog/article/publish', // 文章发布
+  Photo = '/photo/photo', // 照片管理
+  PhotoDelete = '/photo/delete' // 照片回收站
 }

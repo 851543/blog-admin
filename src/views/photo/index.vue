@@ -14,24 +14,25 @@
       <el-col :xs="24" :sm="12" :lg="6" class="el-col2">
         <el-button @click="handleQuery" v-ripple>搜索 </el-button>
         <el-button @click="handleAdd" v-auth="['server:tag:add']" v-ripple>新增 </el-button>
-        <el-button @click="handleQuery" v-ripple>回收站 </el-button>
+        <el-button @click="handleDel" v-ripple>回收站 </el-button>
       </el-col>
     </el-row>
 
+    <el-empty v-if="albumList == null" description="暂无相册" align="center" />
+
     <el-row class="album-container" :gutter="12" v-loading="loading">
-      <el-empty v-if="albumList.length == 0" description="暂无相册" />
       <el-col v-for="item of albumList" :key="item.id" :md="6">
         <div class="album-item" @click="checkPhoto(item)">
           <div class="album-opreation">
             <el-dropdown placement="bottom-end" @command="handleCommand">
-              <i class="iconfont-sys" v-html="'&#xe602;'" style="color: #ffffff;" />
+              <i class="iconfont-sys" v-html="'&#xe839;'" style="color: #ffffff" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item :command="'update' + JSON.stringify(item)">
-                    <i class="iconfont-sys" v-html="'&#xe602;'" />编辑
+                    <i class="iconfont-sys" v-html="'&#xe642;'" />编辑
                   </el-dropdown-item>
                   <el-dropdown-item :command="'delete' + item.id">
-                    <i class="iconfont-sys" v-html="'&#xe602;'" />删除
+                    <i class="iconfont-sys" v-html="'&#xe783;'" />删除
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -39,7 +40,12 @@
           </div>
           <div class="album-photo-count">
             <div>{{ item.photoCount }}</div>
-            <i v-if="item.status == 2" class="iconfont el-icon-mymima" />
+            <i
+              v-if="item.status == 2"
+              class="iconfont-sys"
+              v-html="'&#xe817;'"
+              style="font-size: 1.5rem"
+            />
           </div>
           <el-image fit="cover" class="album-cover" :src="item.albumCover" />
           <div class="album-name">{{ item.albumName }}</div>
@@ -171,6 +177,7 @@
     albumName: '',
     albumDesc: '',
     albumCover: '',
+    photoCount: 0,
     status: 1
   }
   const form = reactive({ ...initialFormState })
@@ -229,7 +236,10 @@
   const router = useRouter()
   // 查看相册
   const checkPhoto = (item: any) => {
-    router.push({ path: '/albums/' + item.id })
+    router.push({ path: '/photo/photo/index/' + item.id })
+  }
+  const handleDel = () => {
+    router.push({ path: '/photo-delete' })
   }
 
   // 上传成功后的处理函数
@@ -297,7 +307,7 @@
   }
 
   /** 修改按钮操作 */
-  const handleUpdate = (row: any) => {
+  const handleUpdate = async (row: any) => {
     reset()
     Object.assign(form, JSON.parse(row))
     open.value = true
@@ -396,7 +406,7 @@
     position: relative;
     border-radius: 4px;
     width: 100%;
-    height: 170px;
+    height: 200px;
   }
   .album-cover::before {
     content: '';

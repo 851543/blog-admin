@@ -2,7 +2,7 @@ import { BaseArrayResult, BaseObjectResult, BasePageResult } from '../axios'
 
 // 相册对象类型定义
 export interface PhotoAlbumResult {
-  id?: number
+  id: number
   albumName: string
   albumDesc: string
   albumCover: string
