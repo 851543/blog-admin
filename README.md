@@ -59,14 +59,6 @@ yarn dev
 3. 构建生产版本
 ```bash
 yarn build
-```
-
-## 浏览器支持
-推荐使用最新版本的现代浏览器
-- Chrome
-- Firefox
-- Safari
-- Edge
 
 ## 贡献指南
 欢迎提交问题和改进建议。请确保在提交之前：
@@ -74,3 +66,4 @@ yarn build
 2. 创建一个新的分支
 3. 提交你的更改
 4. 创建一个 Pull Request
+
