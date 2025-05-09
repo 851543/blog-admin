@@ -158,6 +158,9 @@ export const extractUrlPath = (url: string, path = false): string => {
  * @returns 处理后的菜单项
  */
 const handleDirectMenu = (firstChild: MenuBackendType): MenuListType => {
+  if (!firstChild.path.includes('/')) {
+    firstChild.path = '/' + firstChild.path
+  }
   return {
     id: uuid(),
     name: firstChild.name,
