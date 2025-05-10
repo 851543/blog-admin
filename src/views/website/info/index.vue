@@ -80,7 +80,7 @@
           <el-form-item label="网站创建日期">
             <el-date-picker
               style="width: 400px"
-              value-format="yyyy-MM-dd"
+              value-format="YYYY-MM-DD"
               v-model="websiteConfigForm.websiteCreateTime"
               type="date"
               placeholder="选择日期"
