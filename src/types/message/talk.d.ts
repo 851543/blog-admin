@@ -4,10 +4,11 @@ import { BaseArrayResult, BaseObjectResult, BasePageResult } from '../axios'
 export interface TalkResult {
   id: number
   content: string
-  images: string[]
+  images: string
   isTop: number
   status: number
   createTime: string
+  imgs?: string[]
 }
 
 export type TalkListPageResult = BasePageResult<TalkResult>

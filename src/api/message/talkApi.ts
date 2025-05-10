@@ -1,5 +1,5 @@
 import request from '@/utils/http'
-import { TalkRecordResult, TalkListResult } from '@/types/message/talk'
+import { TalkRecordResult, TalkInfoResult } from '@/types/message/talk'
 import { CodeMsgResult } from '@/types/axios'
 
 // 说说
@@ -24,13 +24,16 @@ class TalkService {
   static deleteTalks(talkIds: number[]) {
     return request.del<CodeMsgResult>({
       url: '/blog/talk/admin/talks',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       data: talkIds
     })
   }
 
   // 根据id获取后台说说
   static getBackTalkById(talkId: number) {
-    return request.get<TalkListResult>({
+    return request.get<TalkInfoResult>({
       url: `/blog/talk/admin/talks/${talkId}`
     })
   }

@@ -14,12 +14,12 @@
 
     <div class="talk-item" v-for="item of talks" :key="item.id">
       <div class="user-info-wrapper">
-        <el-avatar class="user-avatar" :src="item.avatar" :size="36" />
+        <el-avatar class="user-avatar" :src="AvatarImga(item.avatar)" :size="36" />
         <div class="user-detail-wrapper">
           <div class="user-nickname">
             <div>{{ item.nickname }}</div>
             <el-dropdown trigger="click" @command="handleCommand">
-              <i class="el-icon-more" style="color: #333; cursor: pointer" />
+              <i class="iconfont-sys" v-html="'&#xe839;'" style="color: grey" />
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item :command="'1,' + item.id">
@@ -33,7 +33,7 @@
             </el-dropdown>
           </div>
           <div class="time">
-            {{ item.createTime }}
+            {{ parseTime(item.createTime) }}
             <span class="top" v-if="item.isTop == 1">
               <i class="iconfont el-icon-myzhiding" /> 置顶
             </span>
@@ -68,6 +68,7 @@
         <div class="operation-wrapper">
           <div class="left-wrapper">
             <el-upload
+              v-show="uploads.length == 0"
               :action="uploadImageUrl"
               multiple
               :headers="uploadHeaders"
@@ -75,7 +76,7 @@
               :on-success="onSuccess"
               :show-file-list="false"
             >
-              <i class="iconfont-sys" v-html="'&#xe839;'" style="color: #ffffff" />
+              <i class="iconfont-sys" v-html="'&#xe634;'" style="font-size: 32px" />
             </el-upload>
           </div>
           <div class="right-wrapper">
@@ -113,7 +114,7 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-button type="primary" @click="submitForm" :disabled="talk.content == ''">
+            <el-button type="primary" @click="submitForm" :disabled="talk.content == '<p><br></p>'">
               发布
             </el-button>
           </div>
@@ -125,11 +126,20 @@
           list-type="picture-card"
           multiple
           :headers="uploadHeaders"
-          :file-list="uploads"
+          v-model:file-list="uploads"
           :before-upload="beforeUpload"
-          :on-success="onSuccess"
         >
-          <i class="el-icon-plus" />
+          <el-icon><Plus /></el-icon>
+          <template #file="{ file }">
+            <div>
+              <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+              <span class="el-upload-list__item-actions">
+                <span class="el-upload-list__item-delete" @click="handleRemoveUpload(file)">
+                  <el-icon><Delete /></el-icon>
+                </span>
+              </span>
+            </div>
+          </template>
         </el-upload>
       </div>
     </el-dialog>
@@ -141,18 +151,15 @@
   import TalkService from '@/api/message/talkApi'
   import { useUserStore } from '@/store/modules/user'
   import EmojiText from '@/utils/emojo'
-
-  const router = useRouter()
+  import { parseTime, AvatarImga } from '@/utils/utils'
 
   // 响应式数据
   const current = ref(0)
   const size = ref(5)
   const count = ref(0)
   const status = ref('')
-  const isdelete = ref(false)
   const talks = ref<any[]>([])
   const previews = ref<string[]>([])
-  const talkId = ref<number | null>(null)
   const open = ref(false)
   const title = ref('')
   const uploads = ref<any[]>([])
@@ -161,10 +168,11 @@
     { status: 2, desc: '私密' }
   ])
   const initialFormState = {
-    content: '',
-    status: 1,
+    id: null,
+    content: '<p><br></p>',
     isTop: 0,
-    imgs: []
+    status: 1,
+    images: ''
   }
   const talk = reactive({ ...initialFormState })
 
@@ -178,13 +186,12 @@
   // 方法
   const handleCommand = (command: string) => {
     const [action, id] = command.split(',')
-    talkId.value = parseInt(id)
     switch (action) {
       case '1':
-        router.push({ path: '/talks/' + talkId.value })
+        handleUpdate(id)
         break
       case '2':
-        isdelete.value = true
+        handleRemove(id)
         break
     }
   }
@@ -246,37 +253,16 @@
     listTalks()
   }
 
-  const deleteTalk = async () => {
-    try {
-      const { data } = await axios.delete('/api/admin/talks', {
-        data: [talkId.value]
-      })
-      if (data.flag) {
-        ElNotification.success({
-          title: '成功',
-          message: data.message
-        })
-        listTalks()
-      } else {
-        ElNotification.error({
-          title: '失败',
-          message: data.message
-        })
-      }
-      isdelete.value = false
-    } catch (error) {
-      console.error('删除留言失败:', error)
-      ElNotification.error({
-        title: '失败',
-        message: '删除留言失败'
-      })
-    }
+  const handleRemoveUpload = (file: any) => {
+    const index = uploads.value.indexOf(file)
+    uploads.value.splice(index, 1)
   }
 
   // 表单重置
   const reset = () => {
     // 重置表单数据到初始状态
     Object.assign(talk, initialFormState)
+    uploads.value = []
   }
 
   /** 新增按钮操作 */
@@ -286,10 +272,30 @@
     title.value = '发布留言'
   }
 
-  // 取消按钮
-  const cancel = () => {
-    open.value = false
+  /** 删除按钮操作 */
+  const handleRemove = async (id: any) => {
+    const Tr = await ElMessageBox.confirm('是否确认删除留言数据编号为"' + id + '"的数据项？')
+    if (Tr == 'confirm') {
+      const res = await TalkService.deleteTalks([id])
+      if (res.code == 200) {
+        ElMessage.success(res.msg)
+        listTalks()
+      }
+    }
+  }
+
+  /** 修改按钮操作 */
+  const handleUpdate = async (id: any) => {
     reset()
+    open.value = true
+    title.value = '修改留言'
+    const res = await TalkService.getBackTalkById(id)
+    if (res.code == 200) {
+      Object.assign(talk, res.data)
+      if (res.data.imgs) {
+        uploads.value = res.data.imgs.map((item: any) => ({ url: item }))
+      }
+    }
   }
 
   const dropdownTitle = computed(() => {
@@ -297,7 +303,25 @@
     return currentStatus?.desc || ''
   })
 
-  const submitForm = async () => {}
+  const submitForm = async () => {
+    if (talk.content.trim() == '<p><br></p>') {
+      ElMessage.error('说说内容不能为空')
+      return false
+    }
+    if (uploads.value.length > 0) {
+      const img: any = []
+      uploads.value.forEach((item) => {
+        img.push(item.url)
+      })
+      talk.images = JSON.stringify(img)
+    }
+    const res = await TalkService.saveOrUpdateTalk(talk)
+    if (res.code == 200) {
+      ElMessage.success(res.msg)
+      open.value = false
+      listTalks()
+    }
+  }
 
   onMounted(() => {
     listTalks()
@@ -311,6 +335,7 @@
   }
   .pagination-container {
     float: right;
+    margin-top: 20px;
   }
   .status-menu {
     font-size: 14px;
@@ -364,6 +389,7 @@
     font-weight: bold;
     display: flex;
     justify-content: space-between;
+    cursor: pointer;
   }
   .user-sign {
     margin-left: 4px;
