@@ -155,9 +155,7 @@
   import { PhotoAlbumResult } from '@/types/photo/photo'
   import { useUserStore } from '@/store/modules/user'
   import EmojiText from '@/utils/emojo'
-  import defaultAvatar from '@/assets/images/defaultAvatar.png'
   import { Plus } from '@element-plus/icons-vue'
-  import { da } from 'element-plus/es/locale'
   const albumList = ref<PhotoAlbumResult[]>([])
   const open = ref(false)
   const loading = ref(true)

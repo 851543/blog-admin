@@ -116,7 +116,7 @@
   import { FriendLinkResult } from '@/types/website/link'
   import { useUserStore } from '@/store/modules/user'
   import EmojiText from '@/utils/emojo'
-  import defaultAvatar from '@/assets/images/defaultAvatar.png'
+  import defaultAvatar from '@/assets/img/avatar/default-avatar.png'
   import { Plus } from '@element-plus/icons-vue'
   const linkList = ref<FriendLinkResult[]>([])
   const open = ref(false)
